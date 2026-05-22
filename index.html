@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Walter Aguilar - Professional Invoice Dashboard</title>
+    <!-- Tailwind CSS para un diseño moderno y ultra-responsivo -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fuente Inter de Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Ocultar barra de scroll estética pero mantener funcionalidad */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        /* Estilos específicos de impresión para generar PDF limpio */
+        @media print {
+            body {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .print-full-width {
+                width: 100% !important;
+                max-width: 100% !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+                border: none !important;
+            }
+            input, textarea, select {
+                border: none !important;
+                background: transparent !important;
+                padding: 0 !important;
+                outline: none !important;
+                box-shadow: none !important;
+                appearance: none;
+                -webkit-appearance: none;
+            }
+            .print-m-0 {
+                margin: 0 !important;
+            }
+            .print-p-0 {
+                padding: 0 !important;
+            }
+            th {
+                background-color: #f1f5f9 !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen text-slate-800 flex flex-col antialiased">
+
+    <!-- Header / Navbar Principal (Oculto al imprimir) -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-40 no-print shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-indigo-600 text-white p-2 rounded-xl shadow-md">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5 sm:w-6 sm:h-6">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-sm sm:text-lg font-bold text-slate-900 leading-none">Walter Aguilar</h1>
+                    <span class="text-[10px] sm:text-xs text-slate-500 font-medium">Professional Billing Suite</span>
+                </div>
+            </div>
+            
+            <div class="flex items-center space-x-2 sm:space-x-3">
+                <button onclick="resetInvoiceForm()" class="flex items-center space-x-1 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs sm:text-sm font-semibold transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 sm:w-4 sm:h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182m0-4.991v4.99" />
+                    </svg>
+                    <span class="hidden xs:inline">New</span>
+                </button>
+                <button onclick="window.print()" class="flex items-center space-x-1 px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs sm:text-sm font-semibold shadow-md shadow-indigo-100 transition-all">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3.5 h-3.5 sm:w-4 sm:h-4">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.72 13.829c-.24.03-.48.062-.72.096m.72-.096a42.415 42.415 0 0 1 10.56 0m-10.56 0L6.34 18m10.94-4.171c.24.03.48.062.72.096m-.72-.096L17.66 18m0 0 .229-2.523a3.115 3.115 0 0 1 1.29-2.146c1.178-.83 1.933-2.115 1.933-3.531 0-2.436-2.083-4.411-4.654-4.411a4.78 4.78 0 0 0-3.324 1.343l-.736.736-.736-.736a4.78 4.78 0 0 0-3.324-1.343C4.41 3.75 2.328 5.725 2.328 8.161c0 1.416.755 2.7 1.933 3.531a3.11 3.11 0 0 1 1.29 2.146L5.78 18m12.12 0H5.78M9 20.25h6" />
+                    </svg>
+                    <span>Print / PDF</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Contenedor Principal Adaptable -->
+    <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col lg:flex-row gap-6 print-p-0">
+        
+        <!-- COLUMNA IZQUIERDA: CONTROLES Y CONFIGURACIÓN (Oculto al imprimir) -->
+        <section class="w-full lg:w-1/3 space-y-6 no-print order-2 lg:order-1">
+            
+            <!-- KPIs Rápidos -->
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <span class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider block">Total Invoiced</span>
+                    <span class="text-xl sm:text-2xl font-bold text-indigo-600 mt-1 block truncate" id="kpi-total-revenue">$0.00</span>
+                    <span class="text-[9px] sm:text-[10px] text-slate-400 block mt-1">Sum of active session</span>
+                </div>
+                <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+                    <span class="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider block">Saved Invoices</span>
+                    <span class="text-xl sm:text-2xl font-bold text-slate-800 mt-1 block" id="kpi-invoice-count">0</span>
+                    <span class="text-[9px] sm:text-[10px] text-slate-400 block mt-1">Invoices in history</span>
+                </div>
+            </div>
+
+            <!-- Formulario de Configuración -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-5">
+                <div class="border-b border-slate-100 pb-3">
+                    <h2 class="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">Invoice Properties</h2>
+                </div>
+
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Client Name / Business</label>
+                        <input id="ctrl-client-name" type="text" placeholder="Acme Corporation" oninput="syncInvoiceData()" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Client Address</label>
+                        <textarea id="ctrl-client-address" rows="2" placeholder="123 Corporate Blvd&#10;Orlando, FL 32801" oninput="syncInvoiceData()" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all"></textarea>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Invoice Number</label>
+                        <input id="ctrl-invoice-num" type="text" placeholder="INV-2026-001" oninput="syncInvoiceData()" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Due Date</label>
+                        <input id="ctrl-due-date" type="date" oninput="syncInvoiceData()" class="w-full text-sm border border-slate-200 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none transition-all">
+                    </div>
+                </div>
+
+                <div class="pt-4 border-t border-slate-100">
+                    <button onclick="saveInvoiceToHistory()" class="w-full flex justify-center items-center space-x-2 px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-semibold shadow-md shadow-emerald-100 transition-all">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                        </svg>
+                        <span>Save to Session History</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Historial de Facturas en la Sesión -->
+            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h2 class="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">Saved Session History</h2>
+                    <span id="history-badge" class="bg-indigo-50 text-indigo-700 text-xs font-bold px-2.5 py-0.5 rounded-full">0</span>
+                </div>
+                <div id="history-list" class="space-y-3 max-h-[250px] overflow-y-auto pr-1 text-slate-500 text-xs italic text-center py-6">
+                    No invoices saved yet. Enter details and save.
+                </div>
+            </div>
+            
+        </section>
+
+        <!-- COLUMNA DERECHA: HOJA DE FACTURA REAL (Interactivo y Imprimible) -->
+        <section class="flex-grow w-full lg:w-2/3 flex justify-center print-m-0 print-p-0 order-1 lg:order-2">
+            <div id="invoice-sheet" class="bg-white w-full max-w-[850px] border border-slate-200 shadow-lg lg:shadow-xl rounded-2xl p-6 sm:p-10 lg:p-12 flex flex-col justify-between print-full-width print-p-0 print-m-0">
+                
+                <div>
+                    <!-- Encabezado de la Factura -->
+                    <div class="flex flex-col sm:flex-row justify-between items-start gap-6 pb-6 border-b border-slate-200">
+                        <div class="space-y-1.5">
+                            <span class="bg-indigo-50 text-indigo-700 text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-widest no-print inline-block">Interactive Form</span>
+                            <h2 class="text-3xl font-extrabold text-slate-950 uppercase tracking-tight">Invoice</h2>
+                            <div class="flex space-x-3 text-xs font-semibold text-slate-500">
+                                <span id="sheet-lbl-inv-num">INV-2026-001</span>
+                                <span class="text-slate-300">|</span>
+                                <span id="sheet-lbl-date">May 22, 2026</span>
+                            </div>
+                        </div>
+
+                        <!-- Datos Emisor: Walter Aguilar -->
+                        <div class="text-sm text-slate-600 text-left sm:text-right space-y-0.5">
+                            <p class="font-extrabold text-slate-950 text-base">Walter Aguilar</p>
+                            <p class="font-medium text-slate-400 text-xs">Service Provider</p>
+                            <div class="text-xs font-normal text-slate-500 mt-2 leading-relaxed">
+                                <p>3186 SW Centerville</p>
+                                <p>Fort White Fl. 32038</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Información de Cliente y Fechas -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 py-6 border-b border-slate-100">
+                        <div>
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Billed To</span>
+                            <div class="space-y-0.5">
+                                <p id="sheet-client-name" class="font-bold text-slate-900 text-base">Acme Corporation</p>
+                                <p id="sheet-client-address" class="text-sm text-slate-500 leading-relaxed whitespace-pre-line">123 Corporate Blvd&#10;Orlando, FL 32801</p>
+                            </div>
+                        </div>
+                        <div class="flex sm:justify-end text-left sm:text-right">
+                            <div class="space-y-3 w-full sm:w-auto">
+                                <div class="grid grid-cols-2 sm:flex sm:flex-col gap-4 sm:gap-2">
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Issue Date</span>
+                                        <span id="sheet-issue-date" class="text-xs sm:text-sm font-semibold text-slate-700">May 22, 2026</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block">Due Date</span>
+                                        <span id="sheet-due-date" class="text-xs sm:text-sm font-semibold text-rose-600">June 05, 2026</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tabla de Actividades (Responsiva con Scroll Horizontal si es Celular) -->
+                    <div class="py-6">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest block mb-3">Activities & Charges</span>
+                        
+                        <div class="overflow-x-auto -mx-6 sm:mx-0 px-6 sm:px-0">
+                            <table class="w-full text-left border-collapse min-w-[600px]">
+                                <thead>
+                                    <tr class="border-b border-slate-200 bg-slate-50 text-slate-500 text-[10px] font-bold uppercase tracking-wider">
+                                        <th class="py-2.5 px-3 w-3/5">Activity Description (Large Space)</th>
+                                        <th class="py-2.5 px-3 text-center w-20">Qty/Hrs</th>
+                                        <th class="py-2.5 px-3 text-right w-28">Price</th>
+                                        <th class="py-2.5 px-3 text-right w-28">Amount</th>
+                                        <th class="py-2.5 px-2 text-center w-10 no-print"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="invoice-items-body" class="divide-y divide-slate-100 text-sm">
+                                    <!-- Filas Dinámicas de Actividades -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Botón Añadir Actividad (Oculto en PDF) -->
+                        <div class="mt-4 flex justify-start no-print">
+                            <button onclick="addNewRow()" class="flex items-center space-x-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-all">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+                                </svg>
+                                <span>Add Activity</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resumen y Total Financiero -->
+                <div class="pt-6 border-t border-slate-200 mt-6">
+                    <div class="flex flex-col sm:flex-row justify-between gap-6">
+                        
+                        <!-- Términos y Notas -->
+                        <div class="w-full sm:w-1/2 space-y-1.5">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">Notes & Payment Details</span>
+                            <textarea rows="2.5" placeholder="Thank you for your business! Payments can be processed directly via check or electronic transfer." class="w-full text-xs text-slate-500 bg-slate-50 hover:bg-slate-100/50 focus:bg-white border border-transparent hover:border-slate-200 rounded-lg p-2.5 outline-none resize-none transition-all"></textarea>
+                        </div>
+
+                        <!-- Sumatoria Total -->
+                        <div class="w-full sm:w-5/12 flex items-end sm:justify-end">
+                            <div class="w-full bg-slate-50 rounded-xl p-4 border border-slate-100">
+                                <div class="flex justify-between items-center text-sm font-medium text-slate-500">
+                                    <span>Subtotal</span>
+                                    <span id="summary-subtotal" class="font-bold text-slate-800">$0.00</span>
+                                </div>
+                                <div class="flex justify-between items-center border-t border-slate-200/60 pt-2.5 mt-2.5 text-base font-extrabold text-slate-950">
+                                    <span class="text-indigo-600">Total Due (USD)</span>
+                                    <span id="summary-total" class="text-lg sm:text-xl text-indigo-700">$0.00</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pie de Factura -->
+                    <div class="mt-8 text-center border-t border-slate-100 pt-5">
+                        <p class="text-[10px] sm:text-xs font-medium text-slate-400">If you have any questions, please contact Walter Aguilar.</p>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Notificaciones Flotantes (Toast) -->
+    <div id="toast" class="fixed bottom-5 right-5 bg-slate-900 text-white text-xs font-semibold px-4 py-3 rounded-xl shadow-xl z-50 transform translate-y-10 opacity-0 transition-all duration-300 pointer-events-none flex items-center space-x-2">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 text-emerald-400">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+        </svg>
+        <span id="toast-message">Task updated!</span>
+    </div>
+
+    <!-- Scripts de Control e Interactividad de Fórmulas -->
+    <script>
+        // Configuración por defecto de la Aplicación
+        let invoiceState = {
+            invoiceNum: "INV-2026-001",
+            issueDate: "",
+            dueDate: "",
+            clientName: "Acme Corporation",
+            clientAddress: "123 Corporate Blvd\nOrlando, FL 32801",
+            items: [
+                { id: 1, description: "Professional Consulting Services", qty: 8, rate: 110 },
+                { id: 2, description: "On-site Technical Implementation and Support", qty: 15, rate: 95 }
+            ]
+        };
+
+        // Historial de Facturas de Sesión en Memoria
+        let savedInvoices = [];
+
+        window.onload = function() {
+            // Inicializar Fechas Dinámicas (Hoy y Vencimiento en 14 días)
+            const today = new Date();
+            const defaultDueDate = new Date();
+            defaultDueDate.setDate(today.getDate() + 14);
+
+            invoiceState.issueDate = formatDate(today);
+            invoiceState.dueDate = formatDate(defaultDueDate);
+
+            // Cargar datos a los inputs de configuración de la barra lateral
+            document.getElementById('ctrl-invoice-num').value = invoiceState.invoiceNum;
+            document.getElementById('ctrl-client-name').value = invoiceState.clientName;
+            document.getElementById('ctrl-client-address').value = invoiceState.clientAddress;
+            document.getElementById('ctrl-due-date').value = today.toISOString().split('T')[0];
+
+            renderInvoice();
+            updateCalculations();
+        };
+
+        // Formateador de Fechas Amigable (Ej: May 22, 2026)
+        function formatDate(dateObj) {
+            const months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            return `${months[dateObj.getMonth()]} ${String(dateObj.getDate()).padStart(2, '0')}, ${dateObj.getFullYear()}`;
+        }
+
+        // Dibuja la factura en pantalla
+        function renderInvoice() {
+            document.getElementById('sheet-lbl-inv-num').innerText = invoiceState.invoiceNum;
+            document.getElementById('sheet-lbl-date').innerText = invoiceState.issueDate;
+            document.getElementById('sheet-client-name').innerText = invoiceState.clientName || "Client Name / Business";
+            document.getElementById('sheet-client-address').innerText = invoiceState.clientAddress || "Client Address";
+            document.getElementById('sheet-issue-date').innerText = invoiceState.issueDate;
+            document.getElementById('sheet-due-date').innerText = invoiceState.dueDate || "Not Set";
+
+            const itemsBody = document.getElementById('invoice-items-body');
+            itemsBody.innerHTML = '';
+
+            invoiceState.items.forEach((item, index) => {
+                const totalAmount = (item.qty * item.rate).toFixed(2);
+                
+                const tr = document.createElement('tr');
+                tr.className = 'group hover:bg-slate-50/50 transition-all';
+                tr.innerHTML = `
+                    <td class="py-2 px-3">
+                        <textarea rows="1" placeholder="Describe the activity or service rendered..."
+                            oninput="updateItemField(${index}, 'description', this.value); autoResizeTextarea(this);" 
+                            class="w-full text-sm font-semibold text-slate-800 bg-transparent hover:bg-slate-100 focus:bg-white focus:ring-1 focus:ring-indigo-500 rounded px-2 py-1 outline-none transition-all resize-none">${item.description}</textarea>
+                    </td>
+                    <td class="py-2 px-3 text-center">
+                        <input type="number" value="${item.qty}" min="0" step="any"
+                            oninput="updateItemField(${index}, 'qty', parseFloat(this.value) || 0)" 
+                            class="w-full text-center text-sm text-slate-700 bg-transparent hover:bg-slate-100 focus:bg-white focus:ring-1 focus:ring-indigo-500 rounded p-1 outline-none transition-all">
+                    </td>
+                    <td class="py-2 px-3 text-right">
+                        <input type="number" value="${item.rate}" min="0" step="any"
+                            oninput="updateItemField(${index}, 'rate', parseFloat(this.value) || 0)" 
+                            class="w-full text-right text-sm text-slate-700 bg-transparent hover:bg-slate-100 focus:bg-white focus:ring-1 focus:ring-indigo-500 rounded p-1 outline-none transition-all">
+                    </td>
+                    <td class="py-2 px-3 text-right font-semibold text-slate-900">$${totalAmount}</td>
+                    <td class="py-2 px-2 text-center no-print">
+                        <button onclick="removeRow(${index})" class="text-slate-300 hover:text-rose-600 transition-all">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-4 h-4 mx-auto">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </td>
+                `;
+                itemsBody.appendChild(tr);
+                
+                // Redimensionar automáticamente los campos de texto al renderizar
+                const textarea = tr.querySelector('textarea');
+                if (textarea) autoResizeTextarea(textarea);
+            });
+        }
+
+        // Agranda de manera líquida la caja de descripción según el texto escrito
+        function autoResizeTextarea(element) {
+            element.style.height = 'auto';
+            element.style.height = element.scrollHeight + 'px';
+        }
+
+        // Fórmulas Automáticas de Suma y Cálculos
+        function updateCalculations() {
+            let subtotal = 0;
+            
+            invoiceState.items.forEach((item, index) => {
+                const rowTotal = item.qty * item.rate;
+                subtotal += rowTotal;
+                
+                // Actualiza solo la celda de resultado en tiempo real para evitar parpadeos
+                const rows = document.getElementById('invoice-items-body').children;
+                if (rows[index]) {
+                    rows[index].children[3].innerText = `$${rowTotal.toFixed(2)}`;
+                }
+            });
+
+            // Al no haber impuestos ni descuentos, el Total es igual al Subtotal
+            document.getElementById('summary-subtotal').innerText = `$${subtotal.toFixed(2)}`;
+            document.getElementById('summary-total').innerText = `$${subtotal.toFixed(2)}`;
+        }
+
+        // Añadir una nueva fila
+        function addNewRow() {
+            const nextId = invoiceState.items.length > 0 ? Math.max(...invoiceState.items.map(i => i.id)) + 1 : 1;
+            invoiceState.items.push({
+                id: nextId,
+                description: "",
+                qty: 1,
+                rate: 0
+            });
+            renderInvoice();
+            updateCalculations();
+        }
+
+        // Eliminar fila
+        function removeRow(index) {
+            invoiceState.items.splice(index, 1);
+            renderInvoice();
+            updateCalculations();
+        }
+
+        // Actualizar datos de fila específicos sin redibujar toda la pantalla
+        function updateItemField(index, field, value) {
+            invoiceState.items[index][field] = value;
+            updateCalculations();
+        }
+
+        // Sincronizar datos de la barra de propiedades
+        function syncInvoiceData() {
+            invoiceState.invoiceNum = document.getElementById('ctrl-invoice-num').value;
+            invoiceState.clientName = document.getElementById('ctrl-client-name').value;
+            invoiceState.clientAddress = document.getElementById('ctrl-client-address').value;
+
+            const rawDueDate = document.getElementById('ctrl-due-date').value;
+            if (rawDueDate) {
+                const dateParts = rawDueDate.split('-');
+                const formattedDueDate = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                invoiceState.dueDate = formatDate(formattedDueDate);
+            }
+
+            renderInvoice();
+        }
+
+        // Guardar factura al panel de historial
+        function saveInvoiceToHistory() {
+            let total = 0;
+            invoiceState.items.forEach(item => {
+                total += (item.qty * item.rate);
+            });
+
+            const savedItem = {
+                id: crypto.randomUUID(),
+                invoiceNum: invoiceState.invoiceNum,
+                clientName: invoiceState.clientName || "Unnamed Client",
+                total: total,
+                fullState: JSON.parse(JSON.stringify(invoiceState))
+            };
+
+            const existingIdx = savedInvoices.findIndex(inv => inv.invoiceNum === savedItem.invoiceNum);
+            if (existingIdx > -1) {
+                savedInvoices[existingIdx] = savedItem;
+                showToast(`Invoice ${savedItem.invoiceNum} updated!`);
+            } else {
+                savedInvoices.push(savedItem);
+                showToast(`Invoice ${savedItem.invoiceNum} saved!`);
+            }
+
+            renderHistoryList();
+            updateDashboardKPIs();
+        }
+
+        // Dibujar lista de facturas guardadas
+        function renderHistoryList() {
+            const container = document.getElementById('history-list');
+            const badge = document.getElementById('history-badge');
+            
+            badge.innerText = savedInvoices.length;
+
+            if (savedInvoices.length === 0) {
+                container.innerHTML = `<span class="text-xs text-slate-400 block py-6 italic">No invoices saved yet.</span>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            savedInvoices.forEach(inv => {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between p-3 bg-slate-50 hover:bg-slate-100 rounded-xl transition-all border border-slate-100 group';
+                div.innerHTML = `
+                    <div class="text-left cursor-pointer flex-grow mr-2 overflow-hidden" onclick="loadSavedInvoice('${inv.id}')">
+                        <p class="font-bold text-slate-800 text-xs">${inv.invoiceNum}</p>
+                        <p class="text-[10px] text-slate-500 truncate max-w-[120px]">${inv.clientName}</p>
+                        <p class="text-[10px] text-indigo-600 font-semibold mt-0.5">$${inv.total.toFixed(2)}</p>
+                    </div>
+                    <div class="flex space-x-1 opacity-100 lg:opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button onclick="loadSavedInvoice('${inv.id}')" title="Edit" class="p-1 bg-white hover:bg-indigo-50 border border-slate-200 text-indigo-600 rounded-md shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                            </svg>
+                        </button>
+                        <button onclick="deleteSavedInvoice('${inv.id}')" title="Delete" class="p-1 bg-white hover:bg-rose-50 border border-slate-200 text-rose-600 rounded-md shadow-sm">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        // Cargar factura guardada al área de trabajo activa
+        function loadSavedInvoice(id) {
+            const item = savedInvoices.find(inv => inv.id === id);
+            if (!item) return;
+
+            invoiceState = JSON.parse(JSON.stringify(item.fullState));
+
+            document.getElementById('ctrl-invoice-num').value = invoiceState.invoiceNum;
+            document.getElementById('ctrl-client-name').value = invoiceState.clientName;
+            document.getElementById('ctrl-client-address').value = invoiceState.clientAddress;
+
+            renderInvoice();
+            updateCalculations();
+            showToast(`Loaded ${invoiceState.invoiceNum}`);
+        }
+
+        // Eliminar factura de la sesión
+        function deleteSavedInvoice(id) {
+            savedInvoices = savedInvoices.filter(inv => inv.id !== id);
+            renderHistoryList();
+            updateDashboardKPIs();
+            showToast("Invoice deleted.");
+        }
+
+        // Actualizar KPIs de totales de la sesión
+        function updateDashboardKPIs() {
+            let total = 0;
+            savedInvoices.forEach(inv => {
+                total += inv.total;
+            });
+            document.getElementById('kpi-total-revenue').innerText = `$${total.toFixed(2)}`;
+            document.getElementById('kpi-invoice-count').innerText = savedInvoices.length;
+        }
+
+        // Preparar formulario para una nueva factura limpia
+        function resetInvoiceForm() {
+            const numMatch = invoiceState.invoiceNum.match(/\d+$/);
+            let nextNumStr = "001";
+            if (numMatch) {
+                const currentVal = parseInt(numMatch[0]);
+                nextNumStr = String(currentVal + 1).padStart(numMatch[0].length, '0');
+            }
+            const nextInvoiceNum = `INV-2026-${nextNumStr}`;
+
+            const today = new Date();
+            const defaultDueDate = new Date();
+            defaultDueDate.setDate(today.getDate() + 14);
+
+            invoiceState = {
+                invoiceNum: nextInvoiceNum,
+                issueDate: formatDate(today),
+                dueDate: formatDate(defaultDueDate),
+                clientName: "",
+                clientAddress: "",
+                items: [
+                    { id: 1, description: "", qty: 1, rate: 0 }
+                ]
+            };
+
+            document.getElementById('ctrl-invoice-num').value = invoiceState.invoiceNum;
+            document.getElementById('ctrl-client-name').value = "";
+            document.getElementById('ctrl-client-address').value = "";
+            document.getElementById('ctrl-due-date').value = defaultDueDate.toISOString().split('T')[0];
+
+            renderInvoice();
+            updateCalculations();
+            showToast("New blank invoice created!");
+        }
+
+        // Mostrar notificación de confirmación
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').innerText = message;
+            
+            toast.classList.remove('translate-y-10', 'opacity-0');
+            toast.classList.add('translate-y-0', 'opacity-100');
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-10', 'opacity-0');
+                toast.classList.remove('translate-y-0', 'opacity-100');
+            }, 2500);
+        }
+    </script>
+</body>
+</html>
